@@ -1,6 +1,6 @@
 require('../../lib/globals')
 
-const CACHE_THRESHOLD = 1000
+const CACHE_THRESHOLD = 250
 
 let   id,
       state,
@@ -128,7 +128,7 @@ const run = () => {
    }
 
   const save_rows = ( callback, deadlock ) => {
-    db.sequelize.query( public_key_query() )
+    db.sequelize.query( public_key_query(), { retry: { match: [ /Deadlock/i ], max: 1000 } } )
       .then( result => {
         if(deadlock) console.log(colors.green(`Thread ${id}: DEADLOCK: RESOLVED`))
         cache = ""

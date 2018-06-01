@@ -6,6 +6,7 @@ This tool can be used to generate snapshots for **any period** in a **determinis
 
 ## Table of Contents
 - [Installation](#installation)
+- [Upgrade Instructions](#upgrade-instructions)
 - [Troubleshooting](#troubleshooting)
 - [Common Usage](#comnmon-usage)
 - [Configuration Options](#configuration-options)
@@ -89,9 +90,19 @@ Please view [Parity Documentation](https://wiki.parity.io/Configuring-Parity) if
 
 ### 4. Run the Snapshot
 
+#### Install Dependencies
 From the *root directory of this project directory*, run the following:
-- `npm install` (first time)
-- `node snapshot.js --load_config`
+
+```
+npm update
+npm install -g lerna
+npm install
+```
+
+#### Run
+_see faq for information on lerna_
+
+`node snapshot.js --load_config`
 
 **Note** See other useful configuration options, such as `--resume` and `--poll`, below
 
@@ -119,6 +130,11 @@ um Address, EOS Key and EOS Balance of every address that registered correctly w
 
 #### 6c. Snapshot in Root Directory
 If `overwrite_snapshot` is set to true, all the above files will be put into the root directory of the project. If you are doing any development on this project, it's suggested that you change this to `false` (it's enabled by default in the `config.default.js` file.)
+
+## Upgrade Instructions
+1. Import bin/schema.sql to database
+2. `npm update`
+3. `npm install`
 
 ## Configuration Options
 
@@ -299,67 +315,96 @@ Below is the script transposed to plain english.
 2. Check Connections to MySQL, Redis and Web3
 3. Truncate Databases
 4. Generate Period Map
+
 	1. Used to define block ranges of periods
 	2. Determines the block range that the snapshot is based upon
+
 5. Set Application State Variables (including user configurations)
 6. Set Block Range
+
 	7. If tokens are frozen, force the snapshot block range to `state.block_state` and the deterministic freeze block (block tokens were frozen)
 	8. Otherwise, set block range to user defined block range.
+
 6. Sync Public keys
+
 	7. For every address between block range, sync ethereum public keys to table.
+
 	8. If IPC connection, use multi-threaded implementation.
 5. Sync history of token and crowdsale contract.
+
 	1. EOS Transfers
 	2. Buys
 	3. Claims
 	4. Registrations
 	5. Reclaimable Transfers
 	6. Resuming:
+
 		6. If resume is set, it will only sync data from where it left off
+
 		7. Otherwise, contract tables will be truncated and it will re-sync everything from scratch.
 2. Compile list of every address that has ever had an EOS balance, for each address:
+
 	1. Aggregate relevant txs
+
 		1. Claims and Buys, required for Unclaimed Balance Calculation
 		2. Transfers, all incoming and outgoing tx from address
 		3. Reclaimable Transfers, every reclaimable has a corresponding transfer [special case]
 		4. The last registration transaction to occur within defined block range
+
 	2. Calculate
+
 		1. Sum Wallet Balance (sum(transfers_in) - sum(transfers_out))
 		2. Calculate Unclaimed Balance
 		3. Sum Reclaimed Transfer Balances
 		4. Sum Balances
 		5. Convert balances from gwei
+
 	3. Validate
+
 		1. 	Check Wallet Balance
 		2. Validate EOS Key, if valid set `registered` to `true`
 		3. If EOS key error, save error to column `register_error`
 		4. If all validated, set `valid` to true.
 	5. Process
+
 		6. Save every wallet regardless of validation or balance to `wallets` table
-        6. Resuming:
-	        7. resume is set and recalculate_wallets is not set, it will only process the above data for addresses with changes since the last sync and adjust block range for wallets accordingly (in the case of buys, it will aggregate based on period not on block range, because future buys are possible)
+
+          6. Resuming:
+
+	           7. resume is set and recalculate_wallets is not set, it will only process the above data for addresses with changes since the last sync and adjust block range for wallets accordingly (in the case of buys, it will aggregate based on period not on block range, because future buys are possible)
+
 		8. resume is not set or recalculate_wallets is set, it will truncate wallets table and process all addresses.
 1. Registration Fallback
+
 	1. Query invalid addresses, above minimum snapshot threshold and without register error "exclude" (EOSToken/Crowdsale contracts)
 	2. Attempt to locate public key for each addrses
+
 		1. if a public key is found, convert it to an EOS Key, update the wallet with the generated key, set fallback to true and set valid to true.
+
 2. Deterministic Index and Account Names
+
 	3. 	Query addresses `order by first_seen, address` in batches of 10000.
 	4. For each batch set the deterministic index and generate the account name
 	5. Update each address.
+
 3. Test
 	1. Daily Totals from DB against daily totals from EOS Utility Contract, failure here would not fail the below tests, but would instead result in inaccurate unclaimed balances. Difficult problem to detect without this test.
 	2. Total Supply, margin of error should be low due to _dust_ from rounding (generally 0.00000001%)
    3. Negative Balances, there should be **zero** negative balances
 7. Output
 	1. **snapshot.csv** - comma-delimited list of ETH addresses, EOS keys and Total EOS ERC20 Balances (user, key, balance respectively)
+		
 		1. Move all valid entries from `wallets` table to `snapshot` table, ordered by balance DESC.
 		2. Generate snapshot.csv from `snapshot` table
 	1. **snapshot_unregistered.csv** - comma-delimited list of ETH addresses and Total EOS ERC20 Balances (user, balance respectively)
+		
 		1. Move all invalid entries whose balance is greater-than or equal-to `minimum_snapshot_balance` from `wallets` table to `snapshot_unregistered` table, ordered by balance DESC.
 		2. Generate snapshot_unregistered.csv from `snapshot_unregistered` table
+
 	1. **distribution.csv** - comma-delimited list of ETH addresses and Total EOS ERC20 Balances (user, balance respectively) **does not include EOS keys!**
+		
 		1. Export all Ethereum Addresses and EOS ERC20 total balances from `wallets` table without any rules of validation imposed to **distribution.csv**
+
    2. **snapshot.json** - Snapshot meta data
 
 		1. Snapshot parameters
