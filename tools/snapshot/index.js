@@ -46,8 +46,6 @@ module.exports = (COMPLETE) => {
       require('./tasks/sync/public_keys'),
       //Sync: events from the crowdsale contract
       require('./tasks/sync/contract'),
-      //Misc: Sanitize Registrations
-      require('./tasks/misc/sanitize-registrations'),
       (state, next) => {
         if(config.only_produce_final_snapshot && !state.frozen) {
           console.log("only_produce_final_snapshot is set to true, skipping wallet calculations and snapshot export.")

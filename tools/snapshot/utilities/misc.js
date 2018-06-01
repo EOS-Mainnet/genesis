@@ -63,7 +63,7 @@ const convert_ethpk_to_eospk = ( pubkey ) => {
 }
 
 const sanitize_user_input = ( input ) => {
-  return input.replace(/[^a-z0-9]+/g, '')
+  return input.replace(/[^a-zA-Z0-9]+/g, '')
 }
 
 module.exports = {
