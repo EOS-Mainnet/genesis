@@ -5,3 +5,5 @@ node_modules/
 data/
 data/*
 package-lock.json
+
+!docker/config.js

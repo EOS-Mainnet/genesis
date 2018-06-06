@@ -1,0 +1,31 @@
+version: '3.1'
+
+services:
+  db:
+    image: mariadb:5
+    restart: always
+    environment:
+      - MYSQL_ALLOW_EMPTY_PASSWORD=1
+    volumes:
+      - ./data:/var/lib/mysql
+  parity:
+    image: parity/parity:v1.11.3
+    command: --mode active --min-peers 150 --tracing off --pruning fast --db-compaction ssd --jsonrpc-apis all --chain mainnet --no-warp --cache-size 16384 --ipc-path /root/ipc/jsonrpc.ipc
+    volumes:
+      - ./io.parity.ethereum:/root/.local/share/io.parity.ethereum
+      - ipc:/root/ipc
+  genesis:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    command: node snapshot.js --load_config --poll --resume --period=350 --verbose_mt --recalculate_wallets --auto-update=none
+    volumes:
+      - ipc:/root/ipc
+    depends_on:
+      - db
+      - parity
+
+volumes:
+  ipc:
+    external: true
+
