@@ -11,7 +11,7 @@ module.exports = ( state, callback ) => {
   const csv = callback => {
     db.Wallets
       .findAll({
-        order: [ ['balance_total', 'DESC'] ],
+        order: [ ['deterministic_index', 'ASC'], ['address', "ASC"] ],
         where: { balance_total: { [Op.gt]: 0 } }
       })
       .then( results => {

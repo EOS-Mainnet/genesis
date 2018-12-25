@@ -6,7 +6,9 @@
   "scripts": {
     "compile": "sh ./bin/compile.sh",
     "compile-all": "sh ./bin/compile-all.sh",
-    "dist": "build --mac"
+    "dist": "build --mac --win",
+    "dist-mac": "build --mac",
+    "dist-win": "build --win"
   },
   "repository": "https://github.com/electron/electron-quick-start",
   "keywords": [
@@ -31,6 +33,10 @@
     "appId": "io.eos.genesis.key-utility",
     "mac": {
       "category": "public.app-category.developer-tools"
+    },
+    "win": {
+      "publisherName": "Block.one LLC",
+      "certificateSubjectName": "Block.one LLC"
     }
   }
 }

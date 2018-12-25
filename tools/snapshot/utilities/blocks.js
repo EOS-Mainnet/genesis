@@ -1,13 +1,13 @@
 let contract  = require('../helpers/web3-contract')
 
 const head = ( callback ) => {
-  web3.eth.getBlock()
+  web3.eth.getBlock('latest')
     .then( callback )
     .catch( e => { throw new Error(e)} )
 }
 
 const head_timestamp = ( callback ) => {
-  web3.eth.getBlock()
+  web3.eth.getBlock('latest')
     .then( block => callback(block.timestamp) )
     .catch( e => { throw new Error(e)} )
 }
@@ -21,7 +21,7 @@ const head_number = ( callback ) => {
 const get = ( block_number, callback ) => {
   web3.eth.getBlock( block_number )
     .then( callback )
-    .catch( e => { throw new Error(e)} )
+    .catch( e => { throw new Error(e) } )
 }
 
 module.exports = {

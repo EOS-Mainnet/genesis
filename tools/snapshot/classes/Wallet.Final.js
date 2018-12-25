@@ -1,13 +1,22 @@
 const async  = require('async'),
       bn     = require('bignumber.js'),
       Wallet = require('./Wallet'),
-      util = require('../utilities')
+      util = require('../utilities'),
+      address_key = require('../helpers/web3-address').key
 
-class WalletMainnet extends Wallet {
+class WalletFinal extends Wallet {
 
   process_key( complete ){
-    this.maybe_fix_key()
-    complete()
+    address_key( this.address )
+      .then( key => {
+        //encode because some of register function exploits ... fixes a different problem from the web3 fork problem
+        this.eos_key = util.misc.sanitize_user_input(key)
+        this.maybe_fix_key()
+        complete()
+      })
+      .catch( e => {
+        throw new Error(e)
+      })
   }
 
   process_balance_wallet( complete ){
@@ -53,7 +62,7 @@ class WalletMainnet extends Wallet {
 
   process_exclude(complete){
     const exclude = [CS_ADDRESS_CROWDSALE, CS_ADDRESS_TOKEN]
-    if(!this.config.include_b1) exclude.push(CS_ADDRESS_B1)
+    // if(!this.config.include_b1) exclude.push(CS_ADDRESS_B1)
     if(exclude.indexOf(this.address) > -1)
       this.accepted           = false,
       this.register_error     = 'exclude'
@@ -77,4 +86,4 @@ class WalletMainnet extends Wallet {
   }
 }
 
-module.exports = WalletMainnet
+module.exports = WalletFinal

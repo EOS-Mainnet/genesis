@@ -18,11 +18,15 @@ db.Wallets = mysql.define("wallet", {
   register_error:     Sequelize.STRING(256),
   fallback_error:     Sequelize.STRING(256),
   valid:              Sequelize.BOOLEAN,
+  deterministic_index:Sequelize.INTEGER,
+  account_name:       Sequelize.STRING(256),
+  first_seen:         Sequelize.INTEGER
+
 }, {updateOnDuplicate: true, timestamps: false})
 
 db.Transfers = mysql.define('transfer', {
-  id: {
-    type:             Sequelize.INTEGER,
+  uuid:               {
+    type:             Sequelize.STRING(256),
     primaryKey:       true
   },
   tx_hash:            Sequelize.STRING(256),
@@ -33,8 +37,8 @@ db.Transfers = mysql.define('transfer', {
 }, modelConfig)
 
 db.Buys = mysql.define('buy', {
-  id: {
-    type:             Sequelize.INTEGER,
+  uuid:               {
+    type:             Sequelize.STRING(256),
     primaryKey:       true
   },
   tx_hash:            Sequelize.STRING(256),
@@ -45,8 +49,8 @@ db.Buys = mysql.define('buy', {
 }, modelConfig)
 
 db.Claims = mysql.define('claim', {
-  id: {
-    type:             Sequelize.INTEGER,
+  uuid:               {
+    type:             Sequelize.STRING(256),
     primaryKey:       true
   },
   tx_hash:            Sequelize.STRING,
@@ -57,8 +61,8 @@ db.Claims = mysql.define('claim', {
 }, modelConfig)
 
 db.Reclaimables = mysql.define('reclaimable', {
-  id: {
-    type:             Sequelize.INTEGER,
+  uuid:               {
+    type:             Sequelize.STRING(256),
     primaryKey:       true
   },
   tx_hash:            Sequelize.STRING(256),
@@ -68,11 +72,12 @@ db.Reclaimables = mysql.define('reclaimable', {
 }, modelConfig)
 
 db.Registrations = mysql.define('registration', {
-  id: {
-    type:             Sequelize.INTEGER,
+  uuid:               {
+    type:             Sequelize.STRING(256),
     primaryKey:       true
   },
   tx_hash:            Sequelize.STRING(256),
+  position:           Sequelize.INTEGER,
   block_number:       Sequelize.STRING(256),
   address:            Sequelize.STRING(256),
   eos_key:            Sequelize.STRING(256)
@@ -96,22 +101,25 @@ db.State = mysql.define('state', {
 //Table used to store Snapshot before export to CSV
 db.Snapshot = mysql.define('snapshot', {
   user:               Sequelize.STRING(256),
+  account_name:       Sequelize.STRING(256),
   key:                Sequelize.STRING(256),
   balance:            Sequelize.DECIMAL(15,4)
 }, {timestamps: false, freezeTableName: true, tableName: 'snapshot'})
 
 db.SnapshotUnregistered = mysql.define('snapshot_unregistered', {
   user:               Sequelize.STRING(256),
+  account_name:       Sequelize.STRING(256),
   balance:            Sequelize.DECIMAL(15,4)
 }, {timestamps: false, freezeTableName: true, tableName: 'snapshot_unregistered'})
 
-//Public Key Cache
 db.Keys = mysql.define('keys', {
-  address:            Sequelize.STRING(256),
-  tx_hash:            Sequelize.STRING(256),
+  address:            {
+    type:             Sequelize.STRING(256),
+    primaryKey:       true
+  },
   public_key:         Sequelize.STRING(256),
-  derived_eos_key:    Sequelize.STRING(256)
-}, {timestamps: false, updateOnDuplicate: true})
+  block_number:       Sequelize.INTEGER
+}, {timestamps: false, ignoreDuplicates : true,  tableName: 'public_keys'})
 
 db.sequelize = mysql
 

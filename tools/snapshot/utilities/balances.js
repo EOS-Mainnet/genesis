@@ -12,7 +12,6 @@ let balances = {}
 //Best for polling (fast)
 balances.wallet_token_state = (address, callback) => {
   const contract = require('../helpers/web3-contract')
-
   contract.$token.methods.balanceOf( address ).call()
     .then( balance => {
       balance = new bn( balance )
@@ -29,7 +28,6 @@ balances.wallet_cumulative = ( transfers, callback) => {
 
 balances.unclaimed = ( buys, claims, period_max, callback) => {
   let unclaimed
-  // buys = buys.map( buy => new bn(buy || 0) )
   const periods = util.misc.iota(Number(CS_NUMBER_OF_PERIODS)).map(i => {
     let period = {}
     period.tokens_available = new bn( i == 0 ? CS_CREATE_FIRST_PERIOD : CS_CREATE_PER_PERIOD )
@@ -44,7 +42,7 @@ balances.unclaimed = ( buys, claims, period_max, callback) => {
   unclaimed = new bn(
     periods
       //Get periods by unclaimed and lte last block
-      .filter( (period, i) => { return i <= (period_max || CS_NUMBER_OF_PERIODS-1) && !period.claimed && period.buys.gt(0) })
+      .filter( (period, i) => { return i <= (period_max || CS_MAX_PERIOD_INDEX) && !period.claimed && period.buys.gt(0) })
       //Sum the pre-calculated EOS balance of each resulting period
       .reduce( (sum, period) => period.share.plus(sum), new bn(0) )
   )

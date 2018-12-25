@@ -30,4 +30,4 @@ address.key = address => {
     .keys( address ).call()
 }
 
-module.exports = user
+module.exports = address

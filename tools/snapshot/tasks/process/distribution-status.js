@@ -1,4 +1,5 @@
 module.exports = ( state, complete ) => {
+
   const colors = require("colors/safe"),
         series    = require('async').series,
         contract = require('../../helpers/web3-contract.js')
@@ -31,8 +32,8 @@ module.exports = ( state, complete ) => {
 
     const settings = {}
     const blocks_per_iteration = 100
-    const block_iterations = Math.ceil((state.frozen - state.period_map[CS_NUMBER_OF_PERIODS-1].end)/blocks_per_iteration)
-    const block_offset = state.period_map[CS_NUMBER_OF_PERIODS-1].end
+    const block_iterations = Math.ceil((state.frozen - state.period_map[CS_MAX_PERIOD_INDEX].end)/blocks_per_iteration)
+    const block_offset = state.period_map[CS_MAX_PERIOD_INDEX].end
     let loop = _for(0, function (i) { return true }, function (i) { return i + 1; },
       function loopBody(i, _break, _continue) {
 
@@ -67,15 +68,12 @@ module.exports = ( state, complete ) => {
     ], () => {
       //The crowdsale is over, and tokens are frozen.
       if(state.frozen > 0 && state.crowdsale_over) {
-        // if(config.mode != "mainnet") {
-          //prompt "Would you like to generate a mainnet snapshot"
-          complete(null, state)
-        // }
+        complete(null, state)
       }
       //Tokens aren't frozen, but the mode is set for mainnet. Keep checking until tokens are frozen.
-      else if(state.frozen == 0 && state.crowdsale_over && config.mode == "ongoing") {
+      else if(state.frozen == 0 && state.crowdsale_over && state.mode == "ongoing") {
         setTimeout(() => {
-          if(!recheck) console.log(colors.green("The crowdsale is over and your config indicats you would like to generate a mainnet snapshot, however, the tokens are not yet frozen. Will check once a second, until the tokens are frozen."))
+          if(!recheck) console.log(colors.green("The crowdsale is over and your config indicates you would like to generate a mainnet snapshot, however, the tokens are not yet frozen. Will check once a second, until the tokens are frozen."))
           check(true)
         }, 1000)
       }

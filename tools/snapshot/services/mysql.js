@@ -9,7 +9,13 @@ module.exports = (db, user, pass, host, port) => {
       host: host,
       port: port,
       dialect: "mysql",
-      logging:false
+      logging:false,
+      define: {
+        charset: 'utf8',
+        dialectOptions: {
+          collate: 'utf8_general_ci'
+        }
+      }
     }
   )
 }

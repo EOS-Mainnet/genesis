@@ -28,7 +28,7 @@ let schema = {
       type: 'number',
       conform: function (p) {
         if(p > period.last_closed())
-          return
+          return period.last_closed()
         return true
       },
       default: period.last_closed(),
@@ -36,13 +36,13 @@ let schema = {
     },
 
     //Options
-    include_b1: {
-      type: 'boolean',
-      description: colors.magenta('Include B1 Distribution in Snapshot?'),
-      message: 'Must be boolean',
-      default: true,
-      ask: () => prompt.history('load_config')===false
-    },
+    // include_b1: {
+    //   type: 'boolean',
+    //   description: colors.magenta('Include B1 Distribution in Snapshot?'),
+    //   message: 'Must be boolean',
+    //   default: true,
+    //   ask: () => prompt.history('load_config')===false
+    // },
 
     registration_fallback: {
       type: 'boolean',

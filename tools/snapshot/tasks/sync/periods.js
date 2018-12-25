@@ -27,11 +27,11 @@ module.exports = ( state, complete )  => {
     let periods = new PeriodMap(map)
     if(periods.syncedToPeriod() < config.period ) {
       periods.periodMax = config.period
-      periods.generate( result => {
+      periods.generate( _periods => {
         db.State
-          .upsert({meta_key: 'period_block_map', meta_value: JSON.stringify(periods.map)})
+          .upsert({meta_key: 'period_block_map', meta_value: JSON.stringify(_periods.map)})
           .then( () => {
-            state.period_map          = periods.map
+            state.period_map          = _periods.map
             // state.block_begin         = periods.map[0].begin
             // state.block_end           = periods.map[config.period].end
             complete( null, state )
